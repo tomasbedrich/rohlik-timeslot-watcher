@@ -1,0 +1,12 @@
+version: "3"
+
+services:
+  rohlik-timeslot-watcher:
+    build: .
+    image: rohlik-timeslot-watcher:latest
+    volumes:
+      - ./watcher.py:/app/watcher.py
+    environment:
+      APP_URL: FILLME
+      APP_TELEGRAM_BOT_TOKEN: FILLME
+      APP_TELEGRAM_CHAT_ID: FILLME
