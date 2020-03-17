@@ -19,6 +19,7 @@ config.init("TELEGRAM_URL", str, "https://api.telegram.org/bot{token}/sendMessag
 config.init("TELEGRAM_CHAT_ID", int, None)
 
 config.init("SLEEP", int, 10)  # seconds
+config.init("SUCCESS_SLEEP", int, 60)  # seconds
 config.init("BACKOFF_SLEEP", int, 10)  # seconds
 
 NO_TIMESLOT_MSG = "\u017d\u00e1dn\u00fd term\u00edn rozvozu"
@@ -34,11 +35,17 @@ async def download_data(session: ClientSession, url: str) -> str:
     return (await (await session.get(url)).json())["data"]
 
 
-async def do_stuff(session, data):
-    message = data["firstDeliveryAvailableSinceMessage"]
+async def process_timeslots(session, timeslots):
+    message = timeslots["firstDeliveryAvailableSinceMessage"]
     logging.info(message)
+    sleep = config["SLEEP"]
+
     if message != NO_TIMESLOT_MSG:
         await post_telegram(session, message)
+        sleep = config["SUCCESS_SLEEP"]
+
+    logging.info(f"Sleeping for {sleep=} seconds")
+    await asyncio.sleep(sleep)
 
 
 async def main():
@@ -46,17 +53,13 @@ async def main():
         await post_telegram(session, "Starting watcher")
         while True:
             try:
-                data = await download_data(session, config["URL"])
-                logging.debug("Downloaded data")
+                timeslots = await download_data(session, config["URL"])
+                logging.debug("Downloaded timeslots")
             except (ClientError, asyncio.TimeoutError):
                 logging.exception("Request failed")
                 await asyncio.sleep(config["BACKOFF_SLEEP"])
-                continue
 
-            await do_stuff(session, data)
-
-            logging.info(f"Sleeping for {config['SLEEP']} seconds")
-            await asyncio.sleep(config["SLEEP"])
+            await process_timeslots(session, timeslots)
 
 
 if __name__ == "__main__":
