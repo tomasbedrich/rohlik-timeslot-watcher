@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from socket import gethostname
 
 from aiohttp import ClientSession, ClientTimeout, ClientError
 from llconfig import Config
@@ -44,13 +45,13 @@ async def process_timeslots(session, timeslots):
         await post_telegram(session, message)
         sleep = config["SUCCESS_SLEEP"]
 
-    logging.info(f"Sleeping for {sleep=} seconds")
+    logging.debug(f"{sleep=} (seconds)")
     await asyncio.sleep(sleep)
 
 
 async def main():
     async with ClientSession(**config.get_namespace("HTTP_")) as session:
-        await post_telegram(session, "Starting watcher")
+        await post_telegram(session, f"Starting watcher on {gethostname()}")
         while True:
             try:
                 timeslots = await download_data(session, config["URL"])
