@@ -6,6 +6,6 @@ COPY Pipfile Pipfile.lock ./
 RUN pip3 install pipenv
 RUN pipenv install --deploy --system
 
-COPY watcher.py ./
+COPY . ./
 
-ENTRYPOINT ["python3", "/app/watcher.py"]
+ENTRYPOINT ["python3", "/app/telegram_bot.py"]

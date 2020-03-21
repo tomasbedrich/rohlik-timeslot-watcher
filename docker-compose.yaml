@@ -5,8 +5,7 @@ services:
     build: .
     image: rohlik-timeslot-watcher:latest
     volumes:
-      - ./watcher.py:/app/watcher.py
+      - .:/app
     environment:
-      APP_URL: FILLME
+      APP_ROHLIK_URL: FILLME
       APP_TELEGRAM_BOT_TOKEN: FILLME
-      APP_TELEGRAM_CHAT_ID: FILLME
